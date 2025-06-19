@@ -1,0 +1,604 @@
+<main lang="ja">
+    <div class="kanken-card">
+        <div class="template">
+            <div id="header-container">
+                <div id="kankenlevel">漢字検定 {{KankenLevel}}</div>
+                <div id="sentence">{{SentenceFront}}</div>
+            </div>
+
+            <div id="picture-container">
+                <div id="picture">{{Picture}}</div>
+            </div>
+
+            <div class="audio-button" style="visibility: hidden">{{KankenAudio}}</div>
+        </div>
+
+        <div id="settings-menu">
+            <button id="settings-button" aria-label="設定メニュー">☰</button>
+            <div id="settings-panel">
+
+                <div class="settings-item">
+                    <label for="template-width">表示幅:</label>
+                    <input type="range" id="template-width" min="300" max="800" step="10" value="600">
+                    <span id="width-value">600px</span>
+                </div>
+
+                <div class="settings-item">
+                    <label for="theme-select">外見モード:</label>
+                    <select id="theme-select">
+                        <option value="transparent">透明</option>
+                        <option value="default">ディフォルト</option>
+                    </select>
+                </div>
+
+                <div class="settings-item" id="transparency-setting" style="display: none;">
+                    <label for="transparency-level">透明度:</label>
+                    <input type="range" id="transparency-level" min="0.1" max="1" step="0.1" value="1">
+                    <span id="transparency-value">100%</span>
+                </div>
+
+                <div class="settings-item">
+                    <label for="primary-font">主フォント:</label>
+                    <select id="primary-font">
+                        <option value="Hiragino Mincho ProN">ヒラギノ明朝</option>
+                        <option value="Hiragino Kaku Gothic ProN">ヒラギノ角ゴ</option>
+                        <option value="Hiragino Maru Gothic ProN">ヒラギノ丸ゴ</option>
+                        <option value="DFGyoSho Pro-5">ＤＦ行書体</option>
+                        <option value="DFKinBun Std">ＤＦ金文体</option>
+                    </select>
+                </div>
+
+                <div class="settings-item">
+                    <label for="secondary-font">副フォント:</label>
+                    <select id="secondary-font">
+                        <option value="Hiragino Mincho ProN">ヒラギノ明朝</option>
+                        <option value="Hiragino Kaku Gothic ProN">ヒラギノ角ゴ</option>
+                        <option value="Hiragino Maru Gothic ProN">ヒラギノ丸ゴ</option>
+                        <option value="DFGyoSho Pro-5">ＤＦ行書体</option>
+                        <option value="DFKinBun Std">ＤＦ金文体</option>
+                    </select>
+                </div>
+
+                <div class="settings-item">
+                    <label for="decorative-font">装飾フォント:</label>
+                    <select id="decorative-font">
+                        <option value="Hiragino Mincho ProN">ヒラギノ明朝</option>
+                        <option value="Hiragino Kaku Gothic ProN">ヒラギノ角ゴ</option>
+                        <option value="Hiragino Maru Gothic ProN">ヒラギノ丸ゴ</option>
+                        <option value="DFGyoSho Pro-5">ＤＦ行書体</option>
+                        <option value="DFKinBun Std">ＤＦ金文体</option>
+                    </select>
+                </div>
+
+                <div class="settings-item">
+                    <label for="primary-font-scale">主フォントサイズ:</label>
+                    <input type="range" id="primary-font-scale" min="16" max="40" step="2" value="28">
+                    <span id="primary-font-value">28px</span>
+                </div>
+
+                <div class="settings-item">
+                    <label for="kankenlevel-font-scale">漢検レベルサイズ:</label>
+                    <input type="range" id="kankenlevel-font-scale" min="12" max="32" step="2" value="20">
+                    <span id="kankenlevel-font-value">20px</span>
+                </div>
+
+                <div class="settings-item">
+                    <label for="meaning-font-scale">意味サイズ:</label>
+                    <input type="range" id="meaning-font-scale" min="12" max="32" step="2" value="20">
+                    <span id="meaning-font-value">20px</span>
+                </div>
+            </div>
+        </div>
+    </div>
+</main>
+
+<script>
+    function containsKanji(text) {
+        if (!text) return 0;
+        // - Basic CJK Unified Ideographs (4E00-9FFF)
+        // - CJK Extension A (3400-4DBF)
+        // - CJK Extension B (20000-2A6DF)
+        // - CJK Extension C (2A700-2B73F)
+        // - CJK Extension D (2B740-2B81F)
+        // - CJK Extension E (2B820-2CEAF)
+        // - CJK Extension F (2CEB0-2EBEF)
+        // - CJK Extension G (30000-3134F)
+        // - CJK Extension H (31350-323AF)
+        // - CJK Compatibility Ideographs (F900-FAFF)
+        // - CJK Radicals Supplement (2E80-2EFF)
+        // - Ideographic Description Characters (2FF0-2FFF)
+
+        const cjkBasic = /[\u4E00-\u9FFF]/;
+        // surrogate pairs for UTF-32
+        const cjkExtensions = /\uD840[\uDC00-\uDFFF]|[\uD841-\uD868][\uDC00-\uDFFF]|\uD869[\uDC00-\uDEDF]|\uD869[\uDF00-\uDFFF]|[\uD86A-\uD86C][\uDC00-\uDFFF]|\uD86D[\uDC00-\uDF3F]|\uD86D[\uDF40-\uDFFF]|\uD86E[\uDC00-\uDC1F]|\uD86E[\uDC20-\uDFFF]|[\uD86F-\uD872][\uDC00-\uDFFF]|\uD873[\uDC00-\uDEAF]|\uD873[\uDEB0-\uDFFF]|[\uD874-\uD879][\uDC00-\uDFFF]|\uD87A[\uDC00-\uDFEF]|\uD880[\uDC00-\uDFFF]|[\uD881-\uD883][\uDC00-\uDFFF]|\uD884[\uDC00-\uDF4F]|\uD884[\uDF50-\uDFFF]|[\uD885-\uD887][\uDC00-\uDFFF]|\uD888[\uDC00-\uDFAF]/;
+        const cjkAdditional = /[\uF900-\uFAFF\u2E80-\u2EFF\u2FF0-\u2FFF]/;
+
+        return cjkBasic.test(text) || cjkExtensions.test(text) || cjkAdditional.test(text);
+    }
+
+
+    // Prevent event bubbling for all touch/click events on settings
+    function preventBubbling(e) {
+        e.stopPropagation();
+    }
+
+
+    window.cardContext = {
+        elements: {},
+        initialized: false,
+        isNarrow: false,
+        settingsListenersAttached: false,
+
+        cacheElements() {
+            const selectors = {
+                kankenCard: {selector: ".kanken-card"},
+                templateDiv: {selector: ".template"},
+                sentenceDiv: {selector: "#sentence"},
+                pictureDiv: {selector: "#picture-container"},
+                settingsPanel: {selector: "#settings-panel"},
+                settingsButton: {selector: "#settings-button"},
+                widthSlider: {selector: "#template-width"},
+                widthValue: {selector: "#width-value"},
+                themeSelect: {selector: "#theme-select"},
+                primaryFont: {selector: "#primary-font"},
+                secondaryFont: {selector: "#secondary-font"},
+                decorativeFont: {selector: "#decorative-font"},
+                primaryFontScale: {selector: "#primary-font-scale"},
+                primaryFontValue: {selector: "#primary-font-value"},
+                kankenLevelFontScale: {selector: "#kankenlevel-font-scale"},
+                kankenLevelFontValue: {selector: "#kankenlevel-font-value"},
+                meaningFontScale: {selector: "#meaning-font-scale"},
+                meaningFontValue: {selector: "#meaning-font-value"},
+                transparencySetting: {selector: "#transparency-setting"},
+                transparencySlider: {selector: "#transparency-level"},
+                transparencyValue: {selector: "#transparency-value"}
+            };
+
+            for (const [key, {selector, all}] of Object.entries(selectors)) {
+                this.elements[key] = all ? document.querySelectorAll(selector) : document.querySelector(selector);
+            }
+        },
+
+        loadTheme() {
+            const themeSelect = this.elements.themeSelect;
+            if (!themeSelect) return;
+
+            const savedTheme = localStorage.getItem("kankenTheme") || "default";
+            themeSelect.value = savedTheme;
+            handleThemeChange(savedTheme);
+        },
+
+        updateFontSizes() {
+            const templateDiv = this.elements.templateDiv
+
+            if (this.isNarrow) {
+                // In narrow mode, reset to responsive clamp values
+                templateDiv.style.setProperty('--primary-font-size', '');
+                templateDiv.style.setProperty('--kankenlevel-font-size', '');
+                templateDiv.style.setProperty('--meaning-font-size', '');
+                templateDiv.style.setProperty('--padding-size', '');
+                templateDiv.style.setProperty('--line-height', '');
+                templateDiv.style.setProperty('--margin-between-boxes', '');
+                return;
+            }
+
+            const currentWidth = parseInt(templateDiv.style.width) || 600;
+            const baseWidth = 600;
+
+            const scaleFactor = Math.max(0.7, Math.min(1.3, currentWidth / baseWidth));
+
+            // Get base font sizes from settings or use defaults
+            const basePrimarySize = parseInt(localStorage.getItem('kankenPrimaryFontSize')) || 28;
+            const baseKankenLevelSize = parseInt(localStorage.getItem('kankenKankenLevelFontSize')) || 20;
+            const baseMeaningSize = parseInt(localStorage.getItem('kankenMeaningFontSize')) || 20;
+
+            // Calculate actual scaled font sizes
+            const scaledPrimarySize = Math.round(basePrimarySize * scaleFactor);
+            const scaledKankenLevelSize = Math.round(baseKankenLevelSize * scaleFactor);
+            const scaledMeaningSize = Math.round(baseMeaningSize * scaleFactor);
+
+            // Base values for padding and spacing (in px)
+            const basePaddingSize = 18;
+            const baseMarginBetween = 16;
+
+            // Line height is proportional to the primary font size
+            const lineHeightRatio = 1.3;
+            const calculatedLineHeight = Math.round(scaledPrimarySize * lineHeightRatio);
+            const calculatedMeaningLineHeight = Math.round(scaledMeaningSize * lineHeightRatio);
+
+            // Apply scaled font sizes
+            templateDiv.style.setProperty('--primary-font-size', scaledPrimarySize + 'px');
+            templateDiv.style.setProperty('--kankenlevel-font-size', scaledKankenLevelSize + 'px');
+            templateDiv.style.setProperty('--meaning-font-size', scaledMeaningSize + 'px');
+
+            // Apply scaled padding, spacing and line height
+            templateDiv.style.setProperty('--padding-size', Math.round(basePaddingSize * scaleFactor) + 'px');
+            templateDiv.style.setProperty('--line-height', calculatedLineHeight + 'px');
+            templateDiv.style.setProperty('--meaning-line-height', calculatedMeaningLineHeight + 'px');
+            templateDiv.style.setProperty('--margin-between-boxes', Math.round(baseMarginBetween * scaleFactor) + 'px');
+        },
+
+        detectNarrowMode() {
+            this.isNarrow = window.innerWidth <= 500;
+            return this.isNarrow;
+        },
+
+        init() {
+            if (this.initialized) return;
+
+            this.detectNarrowMode();
+            this.cacheElements();
+            this.loadTheme();
+
+            this.initialized = true;
+        }
+    };
+
+
+    function initializeKankenCard() {
+        if (!window.cardContext) return;
+
+        window.cardContext.init();
+        const ctx = window.cardContext;
+
+        requestAnimationFrame(() => {
+            if (ctx.elements.templateDiv) handleViewportChange();
+            if (ctx.elements.sentenceDiv) handleSentenceAlignment();
+            if (ctx.elements.pictureDiv) handleEmptyImageContainer();
+
+            applyFontSettings();
+            setupGlobalEventListeners();
+        });
+    }
+
+
+    // Handle aligning of sentence (left or centered)
+    function handleSentenceAlignment() {
+        const sentenceDiv = window.cardContext.elements.sentenceDiv;
+        const sentenceText = sentenceDiv.textContent.trim();
+
+        // Center sentence if short (less than 15 chars) AND contains no kanji
+        if (sentenceText.length < 15 && !containsKanji(sentenceText)) {
+            sentenceDiv.style.textAlign = "center";
+        }
+    }
+
+
+    // Hide image container if empty
+    function handleEmptyImageContainer() {
+        const pictureDiv = window.cardContext.elements.pictureDiv;
+        const pictureImages = pictureDiv.getElementsByTagName("img");
+
+        if (pictureImages.length < 1) {
+            pictureDiv.style.visibility = "hidden";
+        }
+    }
+
+
+    function handleViewportChange() {
+        const {templateDiv, settingsPanel, settingsButton, widthSlider, widthValue} = window.cardContext.elements;
+        if (!templateDiv || !settingsPanel || !settingsButton || !widthSlider || !widthValue) return;
+
+        const originalWidthStyle = templateDiv.style.width;
+
+        if (window.cardContext.isNarrow) {
+            // Narrow mode - reset to default width and hide settings
+            templateDiv.style.width = '';
+            settingsPanel.style.display = 'none';
+            settingsButton.style.display = 'none';
+
+            window.cardContext.updateFontSizes();
+        } else {
+            // Wide mode - restore settings
+            settingsButton.style.display = 'flex';
+            const savedWidth = localStorage.getItem('kankenTemplateWidth');
+
+            if (savedWidth) {
+                templateDiv.style.width = savedWidth + 'px';
+                widthSlider.value = savedWidth;
+                widthValue.textContent = savedWidth + 'px';
+            } else {
+                console.log("No saved 'kankenTemplateWidth' found")
+                templateDiv.style.width = originalWidthStyle;
+            }
+
+            window.cardContext.updateFontSizes();
+        }
+    }
+
+
+    function setupWidthSettingListeners() {
+        const {templateDiv, widthSlider, widthValue} = window.cardContext.elements;
+        if (!templateDiv || !widthSlider || !widthValue) return;
+
+        // Update width when slider changes
+        widthSlider.addEventListener('input', (e) => {
+            preventBubbling(e);
+            const newWidth = widthSlider.value;
+            templateDiv.style.width = newWidth + 'px';
+            widthValue.textContent = newWidth + 'px';
+            localStorage.setItem('kankenTemplateWidth', newWidth);
+            window.cardContext.updateFontSizes();
+        });
+    }
+
+
+    function handleTransparencyChange(transparency) {
+        const kankenCard = window.cardContext.elements.kankenCard;
+        if (!kankenCard) return;
+
+        kankenCard.style.setProperty('--transparency-level', transparency);
+        localStorage.setItem("kankenTransparency", transparency);
+
+        // Update display value
+        const transparencyValue = window.cardContext.elements.transparencyValue;
+        if (transparencyValue) {
+            transparencyValue.textContent = Math.round(transparency * 100) + '%';
+        }
+    }
+
+
+    function setupTransparencyListeners() {
+        const transparencySlider = window.cardContext.elements.transparencySlider;
+        if (!transparencySlider) return;
+
+        transparencySlider.addEventListener('input', (e) => {
+            preventBubbling(e);
+            handleTransparencyChange(e.target.value);
+        });
+    }
+
+
+    function handleThemeChange(theme) {
+        const {kankenCard, transparencySetting} = window.cardContext.elements;
+        if (!kankenCard) return;
+
+        kankenCard.className = kankenCard.className.replace(/theme-\w+/g, '');
+        kankenCard.classList.add(`theme-${theme}`);
+        localStorage.setItem("kankenTheme", theme);
+
+        // Show/hide transparency slider based on theme
+        if (transparencySetting) {
+            if (theme === 'transparent') {
+                transparencySetting.style.display = 'block';
+                // Load saved transparency or default to 1
+                const savedTransparency = localStorage.getItem("kankenTransparency") || "1";
+                const transparencySlider = window.cardContext.elements.transparencySlider;
+                if (transparencySlider) {
+                    transparencySlider.value = savedTransparency;
+                    handleTransparencyChange(savedTransparency);
+                }
+            } else {
+                transparencySetting.style.display = 'none';
+                // Reset transparency when not in transparent mode
+                kankenCard.style.removeProperty('--transparency-level');
+            }
+        }
+    }
+
+
+    function setupThemeListeners() {
+        const themeSelect = window.cardContext.elements.themeSelect;
+        if (!themeSelect) return;
+
+        themeSelect.addEventListener('change', (e) => {
+            preventBubbling(e);
+            handleThemeChange(e.target.value);
+        });
+
+        themeSelect.addEventListener('click', preventBubbling);
+    }
+
+
+    function applyFontSettings() {
+        const {kankenCard, primaryFont, secondaryFont, decorativeFont} = window.cardContext.elements;
+        if (!kankenCard) return;
+
+        // Apply saved or default fonts
+        const savedPrimary = localStorage.getItem("kankenPrimaryFont") || "Hiragino Mincho ProN";
+        const savedSecondary = localStorage.getItem("kankenSecondaryFont") || "Hiragino Kaku Gothic ProN";
+        const savedDecorative = localStorage.getItem("kankenDecorativeFont") || "Hiragino Maru Gothic ProN";
+
+        kankenCard.style.setProperty("--primary-font", savedPrimary);
+        kankenCard.style.setProperty("--secondary-font", savedSecondary);
+        kankenCard.style.setProperty("--decorative-font", savedDecorative);
+
+        primaryFont.value = savedPrimary;
+        secondaryFont.value = savedSecondary;
+        decorativeFont.value = savedDecorative;
+    }
+
+
+    function setupFontListeners() {
+        const {kankenCard, primaryFont, secondaryFont, decorativeFont} = window.cardContext.elements;
+        if (!kankenCard) return;
+
+        // Set initial values
+        applyFontSettings();
+
+        if (primaryFont) {
+            primaryFont.addEventListener('change', (e) => {
+                preventBubbling(e);
+                kankenCard.style.setProperty("--primary-font", e.target.value);
+                localStorage.setItem("kankenPrimaryFont", e.target.value);
+            });
+            primaryFont.addEventListener('click', preventBubbling);
+        }
+
+        if (secondaryFont) {
+            secondaryFont.addEventListener('change', (e) => {
+                preventBubbling(e);
+                kankenCard.style.setProperty("--secondary-font", e.target.value);
+                localStorage.setItem("kankenSecondaryFont", e.target.value);
+            });
+            secondaryFont.addEventListener('click', preventBubbling);
+        }
+
+        if (decorativeFont) {
+            decorativeFont.addEventListener('change', (e) => {
+                preventBubbling(e);
+                kankenCard.style.setProperty("--decorative-font", e.target.value);
+                localStorage.setItem("kankenDecorativeFont", e.target.value);
+            });
+            decorativeFont.addEventListener('click', preventBubbling);
+        }
+    }
+
+
+    function setupFontScaleListeners() {
+        const {
+            primaryFontScale,
+            primaryFontValue,
+            kankenLevelFontScale,
+            kankenLevelFontValue,
+            meaningFontScale,
+            meaningFontValue
+        } = window.cardContext.elements;
+
+        function addSliderListeners(slider, valueSpan, storageKey, callback) {
+            if (!slider || !valueSpan) return;
+
+            slider.addEventListener('input', (e) => {
+                preventBubbling(e);
+                const newSize = slider.value;
+                valueSpan.textContent = newSize + 'px';
+                localStorage.setItem(storageKey, newSize);
+                if (callback) callback();
+            });
+        }
+
+        if (primaryFontScale && primaryFontValue) {
+            const savedPrimarySize = localStorage.getItem('kankenPrimaryFontSize') || '28';
+            primaryFontScale.value = savedPrimarySize;
+            primaryFontValue.textContent = savedPrimarySize + 'px';
+
+            addSliderListeners(primaryFontScale, primaryFontValue, 'kankenPrimaryFontSize',
+                () => window.cardContext.updateFontSizes());
+        }
+
+        if (kankenLevelFontScale && kankenLevelFontValue) {
+            const savedKankenLevelSize = localStorage.getItem('kankenKankenLevelFontSize') || '20';
+            kankenLevelFontScale.value = savedKankenLevelSize;
+            kankenLevelFontValue.textContent = savedKankenLevelSize + 'px';
+
+            addSliderListeners(kankenLevelFontScale, kankenLevelFontValue, 'kankenKankenLevelFontSize',
+                () => window.cardContext.updateFontSizes());
+        }
+
+        if (meaningFontScale && meaningFontValue) {
+            const savedMeaningSize = localStorage.getItem('kankenMeaningFontSize') || '20';
+            meaningFontScale.value = savedMeaningSize;
+            meaningFontValue.textContent = savedMeaningSize + 'px';
+
+            addSliderListeners(meaningFontScale, meaningFontValue, 'kankenMeaningFontSize',
+                () => window.cardContext.updateFontSizes());
+        }
+    }
+
+
+    function setupSettingsPanelListeners() {
+        const {settingsPanel, settingsButton} = window.cardContext.elements;
+        if (!settingsPanel || !settingsButton) return;
+
+        // Settings button event listeners
+        settingsButton.addEventListener('click', (e) => {
+            preventBubbling(e);
+            settingsPanel.style.display = 'block';
+        });
+
+        // Prevent bubbling on the entire settings panel
+        settingsPanel.addEventListener('click', preventBubbling);
+
+        // Close panel when clicking/touching outside
+        document.addEventListener('click', (e) => {
+            if (!settingsPanel.contains(e.target) && !settingsButton.contains(e.target)) {
+                settingsPanel.style.display = 'none';
+            }
+        });
+
+        document.addEventListener('touchstart', (e) => {
+            if (!settingsPanel.contains(e.target) && !settingsButton.contains(e.target)) {
+                settingsPanel.style.display = 'none';
+            }
+        }, {passive: true});
+    }
+
+
+    function setupGlobalEventListeners() {
+
+        function setupSettingsListeners() {
+            setupSettingsPanelListeners();
+            setupWidthSettingListeners();
+            setupThemeListeners();
+            setupFontListeners();
+            setupFontScaleListeners();
+            setupTransparencyListeners();
+            window.cardContext.settingsListenersAttached = true;
+        }
+
+        // Window resize
+        window.addEventListener("resize", function () {
+            requestAnimationFrame(handleViewportChange);
+            window.cardContext.detectNarrowMode()
+
+            if (!window.cardContext.isNarrow && !window.cardContext.settingsListenersAttached) {
+                setupSettingsListeners();
+            }
+
+        }, {passive: true});
+
+
+        // Only set event listeners for settings if not in narrow mode
+        if (!window.cardContext.isNarrow && !window.cardContext.settingsListenersAttached) {
+            setupSettingsListeners();
+        }
+    }
+
+
+    function waitForContent() {
+        const criticalElements = ["sentence", "picture", "settings-panel"];
+
+        function checkReadiness() {
+            return criticalElements.every(id => document.getElementById(id));
+        }
+
+        if (checkReadiness()) {
+            initializeKankenCard();
+            return;
+        }
+
+        const observer = new MutationObserver(() => {
+            if (checkReadiness()) {
+                observer.disconnect();
+                initializeKankenCard();
+            }
+        })
+
+        observer.observe(document.body, {
+            childList: true,
+            subtree: true
+        });
+
+        // Fall back timeout
+        let frameCount = 0;
+
+        function checkAfterFrames() {
+            if (checkReadiness() || frameCount > 60) {
+                observer.disconnect();
+                initializeKankenCard();
+            } else {
+                frameCount++;
+                requestAnimationFrame(checkAfterFrames);
+            }
+        }
+
+        requestAnimationFrame(checkAfterFrames);
+    }
+
+
+    if (document.readyState === "loading") {
+        document.addEventListener("DOMContentLoaded", waitForContent);
+    } else {
+        waitForContent();
+    }
+</script>
