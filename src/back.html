@@ -57,29 +57,38 @@
                         <option value="Hiragino Kaku Gothic ProN">ヒラギノ角ゴ</option>
                         <option value="Hiragino Maru Gothic ProN">ヒラギノ丸ゴ</option>
                         <option value="DFGyoSho Pro-5">ＤＦ行書体</option>
-                        <option value="DFKinBun Std">ＤＦ金文体</option>
+                        <option value="DFGiHi Pro-5">ＤＦ魏碑体</option>
+                        <option value="DFTegakiAya">ＤＦてがき彩</option>
+                        <option value="FOT-TsukuOldMinPro">FOT-筑紫オールド明朝</option>
+                        <option value="FTT-KafuPenji">FTT-花風ペン字体</option>
                     </select>
                 </div>
 
                 <div class="settings-item">
-                    <label for="secondary-font">副フォント:</label>
-                    <select id="secondary-font">
+                    <label for="kanken-level-font">漢検レベルフォント:</label>
+                    <select id="kanken-level-font">
                         <option value="Hiragino Mincho ProN">ヒラギノ明朝</option>
                         <option value="Hiragino Kaku Gothic ProN">ヒラギノ角ゴ</option>
                         <option value="Hiragino Maru Gothic ProN">ヒラギノ丸ゴ</option>
                         <option value="DFGyoSho Pro-5">ＤＦ行書体</option>
-                        <option value="DFKinBun Std">ＤＦ金文体</option>
+                        <option value="DFGiHi Pro-5">ＤＦ魏碑体</option>
+                        <option value="DFTegakiAya">ＤＦてがき彩</option>
+                        <option value="FOT-TsukuOldMinPro">FOT-筑紫オールド明朝</option>
+                        <option value="FTT-KafuPenji">FTT-花風ペン字体</option>
                     </select>
                 </div>
 
                 <div class="settings-item">
-                    <label for="decorative-font">装飾フォント:</label>
-                    <select id="decorative-font">
+                    <label for="meaning-font">意味フォント:</label>
+                    <select id="meaning-font">
                         <option value="Hiragino Mincho ProN">ヒラギノ明朝</option>
                         <option value="Hiragino Kaku Gothic ProN">ヒラギノ角ゴ</option>
                         <option value="Hiragino Maru Gothic ProN">ヒラギノ丸ゴ</option>
                         <option value="DFGyoSho Pro-5">ＤＦ行書体</option>
-                        <option value="DFKinBun Std">ＤＦ金文体</option>
+                        <option value="DFGiHi Pro-5">ＤＦ魏碑体</option>
+                        <option value="DFTegakiAya">ＤＦてがき彩</option>
+                        <option value="FOT-TsukuOldMinPro">FOT-筑紫オールド明朝</option>
+                        <option value="FTT-KafuPenji">FTT-花風ペン字体</option>
                     </select>
                 </div>
 
@@ -118,6 +127,27 @@
         isNarrow: false,
         settingsListenersAttached: false,
 
+        fontConfigs: [
+            {
+                element: 'primaryFont',
+                cssVar: '--primary-font',
+                storageKey: 'kankenPrimaryFont',
+                defaultFont: 'Hiragino Mincho ProN'
+            },
+            {
+                element: 'kankenLevelFont',
+                cssVar: '--kanken-level-font',
+                storageKey: 'kankenLevelFont',
+                defaultFont: 'Hiragino Maru Gothic ProN'
+            },
+            {
+                element: 'meaningFont',
+                cssVar: '--meaning-font',
+                storageKey: 'kankenMeaningFont',
+                defaultFont: 'Hiragino Mincho ProN'
+            }
+        ],
+
         cacheElements() {
             const selectors = {
                 kankenCard: {selector: ".kanken-card"},
@@ -133,8 +163,8 @@
                 widthValue: {selector: "#width-value"},
                 themeSelect: {selector: "#theme-select"},
                 primaryFont: {selector: "#primary-font"},
-                secondaryFont: {selector: "#secondary-font"},
-                decorativeFont: {selector: "#decorative-font"},
+                kankenLevelFont: {selector: "#kanken-level-font"},
+                meaningFont: {selector: "#meaning-font"},
                 primaryFontScale: {selector: "#primary-font-scale"},
                 primaryFontValue: {selector: "#primary-font-value"},
                 kankenLevelFontScale: {selector: "#kankenlevel-font-scale"},
@@ -158,6 +188,23 @@
             const savedTheme = localStorage.getItem("kankenTheme") || "default";
             themeSelect.value = savedTheme;
             handleThemeChange(savedTheme);
+        },
+
+        applyFontSettings() {
+            const {kankenCard} = this.elements;
+            if (!kankenCard) return;
+
+            const fontConfigs = this.fontConfigs;
+            if (!fontConfigs) return;
+
+            fontConfigs.forEach(config => {
+                const element = this.elements[config.element];
+                if (element) {
+                    const savedFont = localStorage.getItem(config.storageKey) || config.defaultFont;
+                    kankenCard.style.setProperty(config.cssVar, savedFont);
+                    element.value = savedFont;
+                }
+            })
         },
 
         updateFontSizes() {
@@ -270,6 +317,7 @@
             this.detectNarrowMode();
             this.cacheElements();
             this.loadTheme();
+            this.applyFontSettings();
             this.setGyoushoImageWidths();
             this.handleAlignment();
             this.handleDiagramMargin();
@@ -289,7 +337,6 @@
             if (ctx.elements.templateDiv) handleViewportChange();
 
             hideEmptyTopContainer();
-            applyFontSettings();
             setupGlobalEventListeners();
         });
     }
@@ -417,58 +464,23 @@
     }
 
 
-    function applyFontSettings() {
-        const {kankenCard, primaryFont, secondaryFont, decorativeFont} = window.cardContext.elements;
-        if (!kankenCard) return;
-
-        // Apply saved or default fonts
-        const savedPrimary = localStorage.getItem("kankenPrimaryFont") || "'Hiragino Mincho ProN'";
-        const savedSecondary = localStorage.getItem("kankenSecondaryFont") || "'Hiragino Kaku Gothic ProN'";
-        const savedDecorative = localStorage.getItem("kankenDecorativeFont") || "'Hiragino Maru Gothic ProN'";
-
-        kankenCard.style.setProperty("--primary-font", savedPrimary);
-        kankenCard.style.setProperty("--secondary-font", savedSecondary);
-        kankenCard.style.setProperty("--decorative-font", savedDecorative);
-
-        if (primaryFont) primaryFont.value = savedPrimary;
-        if (secondaryFont) secondaryFont.value = savedSecondary;
-        if (decorativeFont) decorativeFont.value = savedDecorative;
-    }
-
-
     function setupFontListeners() {
-        const {kankenCard, primaryFont, secondaryFont, decorativeFont} = window.cardContext.elements;
+        const {kankenCard} = window.cardContext.elements;
         if (!kankenCard) return;
 
-        // Set initial values
-        applyFontSettings();
+        const fontConfigs = window.cardContext.fontConfigs;
 
-        if (primaryFont) {
-            primaryFont.addEventListener('change', (e) => {
-                preventBubbling(e);
-                kankenCard.style.setProperty("--primary-font", e.target.value);
-                localStorage.setItem("kankenPrimaryFont", e.target.value);
-            });
-            primaryFont.addEventListener('click', preventBubbling);
-        }
-
-        if (secondaryFont) {
-            secondaryFont.addEventListener('change', (e) => {
-                preventBubbling(e);
-                kankenCard.style.setProperty("--secondary-font", e.target.value);
-                localStorage.setItem("kankenSecondaryFont", e.target.value);
-            });
-            secondaryFont.addEventListener('click', preventBubbling);
-        }
-
-        if (decorativeFont) {
-            decorativeFont.addEventListener('change', (e) => {
-                preventBubbling(e);
-                kankenCard.style.setProperty("--decorative-font", e.target.value);
-                localStorage.setItem("kankenDecorativeFont", e.target.value);
-            });
-            decorativeFont.addEventListener('click', preventBubbling);
-        }
+        fontConfigs.forEach(config => {
+            const element = window.cardContext.elements[config.element];
+            if (element) {
+                element.addEventListener('change', (e) => {
+                    preventBubbling(e);
+                    kankenCard.style.setProperty(config.cssVar, e.target.value);
+                    localStorage.setItem(config.storageKey, e.target.value);
+                });
+                element.addEventListener('click', preventBubbling);
+            }
+        });
     }
 
 

@@ -23,10 +23,29 @@
 }
 
 @font-face {
-    font-family: "DFKinBun Std";
-    src: url("_DFKinBun_Std.otf") format('opentype');
+    font-family: "DFGiHi Pro-5";
+    src: url("_DFGiHi_Pro_5") format('opentype');
     font-display: swap;
 }
+
+@font-face {
+    font-family: "FOT-TsukuOldMinPro";
+    src: url("_FOT_TsukuOldMinPro_R.otf") format('opentype');
+    font-display: swap;
+}
+
+@font-face {
+    font-family: "FTT-KafuPenji";
+    src: url("_FTT_KafuPenji.ttf") format('truetype');
+    font-display: swap;
+}
+
+@font-face {
+    font-family: "DFTegakiAya";
+    src: url("_DFTegakiAya_Std_W3.otf") format('opentype');
+    font-display: swap;
+}
+
 
 /* ----------------------------- */
 /* ----- Colours and Fonts ----- */
@@ -46,8 +65,8 @@
 
     /* --- Fonts --- */
     --primary-font: "Hiragino Mincho ProN";
-    --secondary-font: "Hiragino Kaku Gothic ProN";
-    --decorative-font: "Hiragino Maru Gothic ProN";
+    --meaning-font: "Hiragino Mincho ProN";
+    --kanken-level-font: "Hiragino Maru Gothic ProN";
 
     /*　--- Font sizes --- */
     /* Base sizes for scaling in wide mode */
@@ -230,7 +249,7 @@
     margin: 0;
     font-size: 14px;
     color: var(--text-primary-color);
-    font-family: var(--secondary-font);
+    font-family: "Hiragino Kaku Gothic ProN", serif;
 }
 
 #close-settings {
@@ -250,7 +269,7 @@
     font-size: 12px;
     color: var(--text-secondary-color);
     margin-bottom: 4px;
-    font-family: var(--secondary-font);
+    font-family: "Hiragino Kaku Gothic ProN", serif;
 }
 
 #template-width {
@@ -266,7 +285,7 @@
 }
 
 .settings-item option {
-    font-family: "Hiragino Kaku Gothic ProN";
+    font-family: "Hiragino Kaku Gothic ProN", serif;
 }
 
 /* Hide settings in narrow mode */
@@ -327,7 +346,7 @@ header {
 }
 
 #kankenlevel {
-    font-family: var(--decorative-font);
+    font-family: var(--kanken-level-font);
     font-size: var(--kankenlevel-font-size);
     color: var(--kanken-level-color);
     text-align: center;
@@ -341,7 +360,7 @@ header {
 
 #sentence {
     font-size: var(--primary-font-size);
-    font-family: var(--primary-font);
+    font-family: var(--primary-font), sans-serif;
     color: var(--text-primary-color);
     text-align: left;
     margin-top: 0.5rem;
@@ -453,7 +472,7 @@ u {
     gap: 0.75rem;
 
     font-size: var(--meaning-font-size);
-    font-family: var(--primary-font);
+    font-family: var(--meaning-font), sans-serif;
     color: var(--text-secondary-color);
 
     margin-top: var(--margin-between-boxes);
